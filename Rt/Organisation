@@ -1,0 +1,85 @@
+Organisation
+
+Step 1 : Initialiser le raytracer
+
+Ray(raytracer) = O (vecteur Source d'emission) + DIR(vecteur unitaire de direction) * t(distance parcouru)
+
+
+-initialiser ViewPlane(ecran 2d en face de la cam, où l'image s'affiche)
+
+ViewPlane défini par dif variables :
+					-ViewPlaneHeight(hauteur)
+					-ViewPlaneWidth(Largeur)
+					-ViewPlaneDist(Distance entre cam et viewplane, O ?)
+					-viewPlaneUpLeft(Position Haut gauche du viewPlane)
+					-vecDir(vecteur directeur unitaire de cam)
+					-UpVec(vecteur unitaire haut de cam)
+					-vecRight(vecteur unitaire droit de cam)
+					-posP(position du pixel)
+
+viewPlaneUpLeft = camPos + ((vecDir * viewPlaneDist)+(upVec*(viewPlaneHeight/2.0))(vecRight*(viewPlaneWidth/2)))
+
+-Normaliser le vecteur DIR .
+	
+Calcule de la position des pixels finaux :
+		viewPlaneUpLeft + vecRight * xindent * x + upVec * yindent * y
+				AVEC xindent = viewplanewidth / (float)xResolution
+					 yindent = viewplaneHeight / (float)yResolution	
+
+DIR = (O,viewPlaneUpLeft)
+dir = sqrt(O²+posP²)
+DIR = (O,posP)/dir
+
+Step 2.1 : Trouver Primitive sphère
+
+Equation d'une sphère : (x-xc)^2 + (y-yc)^2 + (z-zc)^2 = r^2
+	Avec X,Y,Z point quelquonque.
+		 Xc... centre.
+		 r     rayon de la sphère.
+	Et   x = O.x + DIR.x * t
+		 y = O.y + DIR.y * t
+		 z = O.z + DIR.z * t
+Simplification : a * t^2 + b * t + c = 0
+	Avec a = DIR.x^2 + DIR.y^2 + DIR.z^2
+		 b = 2 * (DIR.x * (O.x - xc) + DIR.y * (O.y - yc) + DIR.z * (O.z - zc))))
+		 c = ((O.x - xc)^2 + (O.y - yc)^2 + (O.z - zc)^2) - r^2
+
+-Trouver le det(le determinant) avec b^2 - 4 * a * c
+	-Si det < 0 : Pas de solution
+		det = 0 : 1 intersection
+		det > 0 : 2 intersection
+-Intersection la plus proche (t)
+	Si det = 0 : t = -b / (2 * a)
+	   det > 0 : t1 = (-b - sqrt(det)) / (2 * a)
+	   			 t2 = (-b + sqrt(det)) / (2 * a)
+	   			 t = la plus petite entre t1 et t2
+
+-Avec t, on a toute les variables de ray et donc l'intersection de la sphère.
+
+Step 2.2 : Trouver Primitive plan
+
+Equation d'un plan : A * x + B * y + C * z + D = 0
+
+
+
+
+
+Partie 1 : Parseur
+Partie 2 : Raytracing
+
+-BOUCLE tant que tout les pixel de l'écran n'ont pas été fait
+{
+	-BOUCLE tant que le nombre d'objet max n'est pas atteint
+	{
+		-Initialisation (step1)
+		-BOUCLE tant que nbr imax pas atteint et que 0 intersection
+		{
+			SI objet = cercle --> Step 2.1
+			SI objet = plan --> Step 2.2
+			SI il y a une intersection, savoir laquel.
+		}
+		-Objet suivant
+	}
+	-Partie 3 : Trouver la bonne couleur ?
+	Pixel suivant
+}
