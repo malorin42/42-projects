@@ -3,93 +3,86 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: malorin <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: aempisse <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/01/22 17:08:25 by malorin           #+#    #+#             */
-/*   Updated: 2016/01/25 16:24:54 by malorin          ###   ########.fr       */
+/*   Created: 2014/11/14 03:33:36 by aempisse          #+#    #+#             */
+/*   Updated: 2014/11/14 03:33:45 by aempisse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int			count_line(char *str)
+static t_gnlfd	*get_gnlfd(int const fd)
 {
-	int		i;
-	int		c;
+	static t_gnlfd	*gnlfd_list = NULL;
+	t_gnlfd			*tmp;
 
-	i = 0;
-	c = 0;
-	while (str[i] != '\0')
+	tmp = gnlfd_list;
+	while (tmp != NULL)
 	{
-		if (str[i] == '\n')
-			c++;
-		i++;
+		if (tmp->fd == fd)
+			return (tmp);
+		tmp = tmp->next;
 	}
-	c++;
-	return (c);
+	if ((tmp = (t_gnlfd*)malloc(sizeof(t_gnlfd))) == NULL)
+		return (NULL);
+	*tmp = (t_gnlfd){NULL, fd, 0, 0, 0, gnlfd_list};
+	gnlfd_list = tmp;
+	return (tmp);
 }
 
-int			find_eol(char *str)
+static int		buff_read(t_gnlfd *gnlfd)
 {
-	int		i;
+	char			*tmp;
+	int				len;
 
-	i = 0;
-	while (str[i] != '\0' && str[i] != '\n')
-		i++;
-	return (i);
+	if ((tmp = (char*)malloc(gnlfd->length + GNL_BUFF_SIZE + 1)) == NULL)
+		return (-1);
+	ft_memcpy(tmp, gnlfd->buff, gnlfd->length);
+	if (gnlfd->buff != NULL)
+		free(gnlfd->buff - gnlfd->offset);
+	gnlfd->buff = tmp;
+	len = read(gnlfd->fd, tmp + gnlfd->length, GNL_BUFF_SIZE);
+	tmp[gnlfd->length + GNL_BUFF_SIZE] = '\0';
+	gnlfd->length += (len < 0) ? 0 : len;
+	gnlfd->offset = 0;
+	gnlfd->i = 0;
+	return (len);
 }
 
-int			end_line(char **tmp, char **line)
+static int		buff_cut(t_gnlfd *gnlfd, int len, t_buff *dst, int rem)
 {
-	*line = ft_strsub(*tmp, 0, find_eol(*tmp));
-	*tmp = ft_strdup(&(*tmp)[find_eol(*tmp) + 1]);
+	gnlfd->buff[len] = '\0';
+	dst->data = gnlfd->buff;
+	dst->length = len;
+	dst->i = 0;
+	len += rem;
+	gnlfd->offset += len;
+	gnlfd->buff += len;
+	gnlfd->length -= len;
+	gnlfd->i -= len;
 	return (1);
 }
 
-int			end_gnl(char **tmp, char **line)
+int				get_next_line(int fd, t_buff *line)
 {
-	if (tmp && count_line(*tmp) == 2)
-	{
-		*line = ft_strsub(*tmp, 0, find_eol(*tmp));
-		*tmp = ft_strdup(&(*tmp)[find_eol(*tmp) + 1]);
-		return (1);
-	}
-	if (tmp && count_line(*tmp) == 1 && ft_strlen(*tmp) > 0)
-	{
-		*line = ft_strdup(*tmp);
-		*tmp = NULL;
-		return (1);
-	}
-	*tmp = NULL;
-	return (0);
-}
+	t_gnlfd			*gnl;
+	int				len;
 
-int			get_next_line(int const fd, char **line)
-{
-	int				ret;
-	char			buf[BUFF_SIZE + 1];
-	static char		*tmp = NULL;
-
-	if (fd < 0 || !line || BUFF_SIZE < 1)
-		return (-1);
-	while (1)
-	{
-		if (tmp && count_line(tmp) > 2)
-			return (end_line(&tmp, line));
-		if ((ret = read(fd, buf, BUFF_SIZE)) == -1)
-			return (-1);
-		if (ret != 0)
+	if (fd >= 0 && line != NULL && (gnl = get_gnlfd(fd)) != NULL)
+		while (1)
 		{
-			buf[ret] = '\0';
-			if (!tmp)
-				tmp = "";
-			tmp = ft_strjoin(tmp, buf);
+			gnl->i--;
+			while (++(gnl->i) < gnl->length)
+				if (gnl->buff[gnl->i] == '\n' || gnl->buff[gnl->i] == -1)
+					return (buff_cut(gnl, gnl->i, line, 1));
+			if ((len = buff_read(gnl)) < 0)
+				break ;
+			if (len == 0 && gnl->length == 0)
+				return (*line = (t_buff){(NULL), 0, 0}, free(gnl->buff - gnl->offset),
+				*gnl = (t_gnlfd){NULL, fd, 0, 0, 0, gnl->next}, 0);
+			if (len == 0)
+				return (buff_cut(gnl, gnl->length, line, 0));
 		}
-		if (ret <= 0)
-		{
-			if (tmp)
-				return (end_gnl(&tmp, line));
-			return (0);
-		}
-	}
+	return (-1);
 }

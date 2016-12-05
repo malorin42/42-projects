@@ -79,12 +79,14 @@ OBJ = OBJ/ft_memset.o\
 	OBJ/ft_rot13.o\
 	OBJ/get_next_line.o\
 	OBJ/ft_parse_double.o\
+	OBJ/ft_parse_not.o\
 	OBJ/ft_tab_new.o\
 	OBJ/ft_tab_add.o\
 	OBJ/ft_tab_ini.o\
 	OBJ/ft_tab_addn.o\
 	OBJ/ft_tab_ext.o\
 	OBJ/ft_tab_kill.o\
+	OBJ/ft_error.o\
 
 CFLAGS = -Wall -Wextra -Werror
 

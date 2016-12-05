@@ -1,0 +1,4 @@
+- Rajout d'une gestion d'erreur dans le cas où il n'y a pas assez d'argument (main.c, line48/49)
+
+- Gros changement dans parser.c : -j'ai fait en sorte de catégorisé le parsing en fonction du type d'objet.
+								  -rajoute de la fonction de parsing pour le plan.

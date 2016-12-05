@@ -19,8 +19,11 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <sys/uio.h>
+# include <fcntl.h>
+# include <stdio.h>
 
 # define BUFF_SIZE 2
+# define GNL_BUFF_SIZE 64
 
 # define TG(t,b,i)		(*(t*)(((t_tab*)b)->data + (((t_tab*)b)->size * (i))))
 
@@ -46,6 +49,16 @@ typedef struct		s_list
 	size_t			content_size;
 	struct s_list	*next;
 }					t_list;
+
+typedef struct		s_gnlfd
+{
+	char			*buff;
+	int				fd;
+	int				length;
+	int				offset;
+	int				i;
+	struct s_gnlfd	*next;
+}					t_gnlfd;
 
 void				ft_putchar(char c);
 void				ft_putstr(char const *str);
@@ -114,14 +127,16 @@ void				ft_lstiter(t_list *lst, void (*f)(t_list *elem));
 void				ft_lstdelone(t_list **alst, void (*del)(void *, size_t));
 void				ft_lstdel(t_list **alst, void (*del)(void *, size_t));
 void				ft_lstadd(t_list **alst, t_list *new);
-int					get_next_line(const int fd, char **line);
+int					get_next_line(int const fd, t_buff *line);
 double				ft_parse_double(t_buff *buff);
+void				ft_parse_not(t_buff *buff, const char *parse);
 t_tab				*ft_tab_new(int size);
 void				ft_tab_add(t_tab *tab, const void *add);
 void				ft_tab_ini(t_tab *tab, int size);
 void				ft_tab_addn(t_tab *tab, const void *add, int n);
 int					ft_tab_ext(t_tab *tab, int need);
 void				ft_tab_kill(void *tab);
+void				ft_error(const char *str);
 
 
 #endif

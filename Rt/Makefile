@@ -1,25 +1,40 @@
-NAME = parseur
+NAME = rtv1
 
-SRCS = main.c\
+GCC = gcc
 
-OBJ = main.o\
+CFLAGS = -Wall -Wextra -Werror
 
-CFLAGS = -Wall -Werror -Wextra
+OBJ = obj/main.o obj/parser.o
 
-$(NAME) :
-		@make -C ../libft/
-		@gcc -c $(SRCS) $(CFLAGS)
-		@gcc $(CFLAGS) -o $(NAME) $(OBJ) ../libft/libft.a
+LIBFT = ../libft/libft.a
 
+all: obj $(NAME)
 
-all : $(NAME)
+$(NAME): $(OBJ)
+	@make -C ../libft/
+	@$(GCC) $(CFLAGS) -o $(NAME) $(OBJ) $(LIBFT)
+	@echo "\|/        "
+	@echo "-o------.  "
+	@echo "/|\     |\ "
+	@echo " |      '-|"
+	@echo " |        |"
+	@echo " | RTv1   |"
+	@echo " '--------'"
 
-clean :
-		@make clean -C ../libft
-		@rm -rf $(OBJ)
+obj:
+	@mkdir -p OBJ/
 
-fclean : clean
-		@make fclean -C ../libft
-		@rm -rf ./parseur
+obj/%.o: Sources/%.c
+	@$(GCC) -c $+ -o $@
 
-re : fclean all
+clean:
+	@rm -rf OBJ/
+	@$(MAKE) -s clean -C ../libft/
+
+fclean: clean
+	@rm -f $(NAME)
+	@$(MAKE) -s fclean -C ../libft/
+
+re: fclean all
+
+.PHONY: all obj clean fclean re
