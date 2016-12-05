@@ -25,6 +25,7 @@ static t_env	*env_init()
 	// env->win = mlx_new_window(env->mlx, WIDTH, HEIGHT, "RTv1");
 	// env->img = ft_new_image(env->mlx);
 	env->sphere = ft_tab_new(sizeof(t_sphere*));
+	env->plane = ft_tab_new(sizeof(t_plane*));
 	/*
 	**hooks
 	*/

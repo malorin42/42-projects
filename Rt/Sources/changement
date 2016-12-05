@@ -2,3 +2,9 @@
 
 - Gros changement dans parser.c : -j'ai fait en sorte de catégorisé le parsing en fonction du type d'objet.
 								  -rajoute de la fonction de parsing pour le plan.
+
+								  ################
+
+- Fonction ft_parse_plane fonctionnel.
+
+- Rajout dans la fonction d'initialisation du malloc de t_tab plane (env->plane)
